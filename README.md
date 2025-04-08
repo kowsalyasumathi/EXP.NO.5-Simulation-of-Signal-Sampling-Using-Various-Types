@@ -136,7 +136,7 @@ def Flatop_sampling(probabilities, Flatop=0.9):
     sorted_probs = probabilities[sorted_indices]  # Sort probabilities accordingly
     
     cumulative_probs = np.cumsum(sorted_probs)  # Compute cumulative probabilities
-    cutoff_index = np.searchsorted(cumulative_probs, platop) + 1  # Find the cutoff index
+    cutoff_index = np.searchsorted(cumulative_probs, Flatop) + 1  # Find the cutoff index
     
     # Restrict to the nucleus of tokens
     nucleus_indices = sorted_indices[:cutoff_index]
@@ -170,7 +170,7 @@ t_sampled = t[t_sampled_indices]  # Corresponding time values
 # Plot sampled signal
 plt.figure(figsize=(10, 4))
 plt.plot(t, signal, label='Continuous Signal', alpha=0.7)
-plt.stem(t_sampled, signal_sampled, linefmt='r-', markerfmt='ro', basefmt='r-', label='Platop Sampled Signal')
+plt.stem(t_sampled, signal_sampled, linefmt='r-', markerfmt='ro', basefmt='r-', label='Flatop Sampled Signal')
 plt.title('Platop Sampling of Continuous Signal')
 plt.xlabel('Time [s]')
 plt.ylabel('Amplitude')
@@ -197,7 +197,8 @@ plt.show()
 
 ![natural sampling output](https://github.com/user-attachments/assets/665de596-1a9c-4247-8002-6a6cf73792a3)
 
-![Flattop sampling output](https://github.com/user-attachments/assets/db305dc3-2b7c-4812-813f-d55c4570a634)
+![Flattop sampling output](https://github.com/user-attachments/assets/b85f2763-aa61-4e09-9859-180158dfbd29)
+
 
 
 # RESULT / CONCLUSIONS:
