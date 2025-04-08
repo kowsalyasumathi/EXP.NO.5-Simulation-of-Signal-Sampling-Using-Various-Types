@@ -5,7 +5,7 @@
     iii) Flat Top Sampling
 
 # AIM: 
-To study and analyze the sampling of natural, ideal and flat top sampling.
+To study and analyze the sampling of natural, ideal and flat top sampling
 
 # SOFTWARE REQUIRED: 
 Google colab software(python)
