@@ -2,7 +2,7 @@
 5.Simulation of Signal Sampling Using Various Types such as
     i) Ideal Sampling
     ii) Natural Sampling
-    iii) Flat Top Sampling
+    iii) Flat Top Sampling.
 
 # AIM: 
 To study and analyze the sampling of natural, ideal and flat top sampling.
