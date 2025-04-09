@@ -11,17 +11,17 @@ To study and analyze the sampling of natural, ideal and flat top sampling.
 Google colab software(python)
 
 # ALGORITHMS:
-step1:Generate a continuous signal using a sine wave.
+step1: Generate a continuous signal using a sine wave.
 
-step2:Apply uniform sampling by selecting fixed-interval samples.
+step2: Apply uniform sampling by selecting fixed-interval samples.
 
-step3:Apply random sampling by selecting random indices.
+step3: Apply random sampling by selecting random indices.
 
-step4:Apply Platop sampling using probability-based selection.
+step4: Apply Platop sampling using probability-based selection.
 
-step5:Plot the original signal and sampled points.
+step5: Plot the original signal and sampled points.
 
-step6:reconstruct the signal using resampling.
+step6: Reconstruct the signal using resampling.
 
 
 
@@ -31,9 +31,9 @@ step6:reconstruct the signal using resampling.
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import resample
-fs = 600
+fs = 100
 t = np.arange(0, 1, 1/fs) 
-f = 8
+f = 6
 signal = np.sin(2 * np.pi * f * t)
 plt.figure(figsize=(10, 4))
 plt.plot(t, signal, label='Continuous Signal')
@@ -64,6 +64,7 @@ plt.ylabel('Amplitude')
 plt.grid(True)
 plt.legend()
 plt.show()
+
 ```
 
 #natural sampling
@@ -71,137 +72,110 @@ plt.show()
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import butter, lfilter
-fs = 1000 
-T = 1  
-t = np.arange(0, T, 1/fs)  
-fm = 10
+fs = 1000  # Sampling frequency (samples per second)
+T = 1  # Duration in seconds
+t = np.arange(0, T, 1 / fs)  # Time vector
+fm = 8  # Frequency of message signal (Hz)
 message_signal = np.sin(2 * np.pi * fm * t)
-pulse_rate = 50  
+pulse_rate = 50  # pulses per second
 pulse_train = np.zeros_like(t)
 pulse_width = int(fs / pulse_rate / 2)
 for i in range(0, len(t), int(fs / pulse_rate)):
-    pulse_train[i:i+pulse_width] = 1
+    pulse_train[i:min(i + pulse_width, len(t))] = 1  # Corrected pulse width handling
 nat_signal = message_signal * pulse_train
-sampled_signal = nat_signal[pulse_train == 1]
-sample_times = t[pulse_train == 1]
-reconstructed_signal = np.zeros_like(t)
-for i, time in enumerate(sample_times):
-    index = np.argmin(np.abs(t - time))
-    reconstructed_signal[index:index+pulse_width] = sampled_signal[i]
 def lowpass_filter(signal, cutoff, fs, order=5):
-     nyquist = 0.5 * fs
-     normal_cutoff = cutoff / nyquist
-     b, a = butter(order, normal_cutoff, btype='low', analog=False)
-     return lfilter(b, a, signal)
-reconstructed_signal = lowpass_filter(reconstructed_signal,10, fs)
+    nyquist = 0.5 * fs
+    normal_cutoff = cutoff / nyquist
+    b, a = butter(order, normal_cutoff, btype='low', analog=False)
+    return lfilter(b, a, signal)
+reconstructed_signal = lowpass_filter(nat_signal, 10, fs) # apply low pass filter to the naturally sampled signal.
 plt.figure(figsize=(14, 10))
-# Original Message Signal
-plt.subplot(3, 1, 1)
+plt.subplot(4, 1, 1)
 plt.plot(t, message_signal, label='Original Message Signal')
 plt.legend()
 plt.grid(True)
-# Pulse Train
 plt.subplot(4, 1, 2)
 plt.plot(t, pulse_train, label='Pulse Train')
 plt.legend()
 plt.grid(True)
-# Natural Sampling
 plt.subplot(4, 1, 3)
 plt.plot(t, nat_signal, label='Natural Sampling')
 plt.legend()
 plt.grid(True)
-# Reconstructed Signal
 plt.subplot(4, 1, 4)
 plt.plot(t, reconstructed_signal, label='Reconstructed Message Signal', color='green')
 plt.legend()
 plt.grid(True)
+
 plt.tight_layout()
 plt.show()
+
 ```
 
 #Flattop sampling
 ```
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.signal import resample
-
-def Flatop_sampling(probabilities, Flatop=0.9):
-    """
-    Flatop Sampling: A modified nucleus sampling approach.
-    :param probabilities: List or numpy array of probabilities for each token.
-    :param platop: The cumulative probability threshold for nucleus sampling.
-    :return: Index of the sampled token.
-    """
-    sorted_indices = np.argsort(probabilities)[::-1]  # Sort indices by probability (descending order)
-    sorted_probs = probabilities[sorted_indices]  # Sort probabilities accordingly
-    
-    cumulative_probs = np.cumsum(sorted_probs)  # Compute cumulative probabilities
-    cutoff_index = np.searchsorted(cumulative_probs, Flatop) + 1  # Find the cutoff index
-    
-    # Restrict to the nucleus of tokens
-    nucleus_indices = sorted_indices[:cutoff_index]
-    nucleus_probs = sorted_probs[:cutoff_index]
-    nucleus_probs /= nucleus_probs.sum()  # Normalize probabilities
-    
-    # Sample from the nucleus
-    sampled_index = np.random.choice(nucleus_indices, p=nucleus_probs)
-    return sampled_index
-fs = 100  # Sampling frequency
-t = np.arange(0, 1, 1/fs)  # Time vector
-f = 5  # Frequency of the sine wave
-signal = np.sin(2 * np.pi * f * t)  # Generate sine wave
-
-# Plot continuous signal
-plt.figure(figsize=(10, 4))
-plt.plot(t, signal, label='Continuous Signal')
-plt.title('Continuous Signal (fs = 100 Hz)')
-plt.xlabel('Time [s]')
-plt.ylabel('Amplitude')
-plt.grid(True)
+from scipy.signal import butter, lfilter
+fs = 1000  # Sampling frequency (samples per second)
+T = 1  # Duration in seconds
+t = np.arange(0, T, 1/fs)  # Time vector
+fm = 4  # Frequency of message signal (Hz)
+message_signal = np.sin(2 * np.pi * fm * t)
+pulse_rate = 50  # pulses per second
+pulse_train = np.zeros_like(t)
+pulse_width = int(fs / pulse_rate / 4)  # Flat-top width
+for i in range(0, len(t), int(fs / pulse_rate)):
+    pulse_train[i:i+pulse_width] = 1
+flat_top_signal = np.copy(message_signal)
+for i in range(0, len(t), int(fs / pulse_rate)):
+    flat_top_signal[i:i+pulse_width] = message_signal[i]  # Hold value constant
+sampled_signal = flat_top_signal[pulse_train == 1]
+sample_times = t[pulse_train == 1]
+reconstructed_signal = np.zeros_like(t)
+for i, time in enumerate(sample_times):
+    index = np.argmin(np.abs(t - time))
+    reconstructed_signal[index:index+pulse_width] = sampled_signal[i]
+def lowpass_filter(signal, cutoff, fs, order=5):
+    nyquist = 0.5 * fs
+    normal_cutoff = cutoff / nyquist
+    b, a = butter(order, normal_cutoff, btype='low', analog=False)
+    return lfilter(b, a, signal)
+reconstructed_signal = lowpass_filter(reconstructed_signal, 10, fs)
+plt.figure(figsize=(14, 10))
+plt.subplot(4, 1, 1)
+plt.plot(t, message_signal, label='Original Message Signal')
 plt.legend()
-plt.show()
-
-# Sampling using Flatop Sampling
-probs = np.abs(signal) / np.sum(np.abs(signal))  # Normalize probabilities
-t_sampled_indices = [Flatop_sampling(probs) for _ in range(len(t)//2)]  # Select indices
-signal_sampled = signal[t_sampled_indices]  # Sampled signal values
-t_sampled = t[t_sampled_indices]  # Corresponding time values
-
-# Plot sampled signal
-plt.figure(figsize=(10, 4))
-plt.plot(t, signal, label='Continuous Signal', alpha=0.7)
-plt.stem(t_sampled, signal_sampled, linefmt='r-', markerfmt='ro', basefmt='r-', label='Flatop Sampled Signal')
-plt.title('Platop Sampling of Continuous Signal')
-plt.xlabel('Time [s]')
-plt.ylabel('Amplitude')
 plt.grid(True)
+plt.subplot(4, 1, 2)
+plt.plot(t, pulse_train, label='Pulse Train')
 plt.legend()
-plt.show()
-
-# Reconstruction
-reconstructed_signal = resample(signal_sampled, len(t))
-plt.figure(figsize=(10, 4))
-plt.plot(t, signal, label='Original Signal', alpha=0.7)
-plt.plot(t, reconstructed_signal, 'r--', label='Reconstructed Signal')
-plt.title('Reconstruction of Platop Sampled Signal')
-plt.xlabel('Time [s]')
-plt.ylabel('Amplitude')
 plt.grid(True)
+plt.subplot(4, 1, 3)
+plt.plot(t, flat_top_signal, label='Flat-Top Sampled Signal')
 plt.legend()
+plt.grid(True)
+plt.subplot(4, 1, 4)
+plt.plot(t, reconstructed_signal, label='Reconstructed Signal', color='red')
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
 plt.show()
 ```
 
 # OUTPUT
+## Impulse sampling
+![image](https://github.com/user-attachments/assets/1cbc04b9-0f56-45e9-bac5-133c58176275)
 
-![impulse sampling output](https://github.com/user-attachments/assets/1ec8f8e6-2c67-4ec3-b0ea-23b02e045deb)
+## Natural sampling
+![image](https://github.com/user-attachments/assets/cc51fac7-ee28-46ff-9d6b-c1bdf41188c7)
 
-![natural sampling output](https://github.com/user-attachments/assets/665de596-1a9c-4247-8002-6a6cf73792a3)
-
-![Flattop sampling output](https://github.com/user-attachments/assets/b85f2763-aa61-4e09-9859-180158dfbd29)
+## Flattop sampling
+![image](https://github.com/user-attachments/assets/98971591-07d3-4e75-8fdc-8aaa101bbdbf)
 
 
 
 # RESULT / CONCLUSIONS:
-Thus the sampling of natural, ideal and flattop sampling techniques were analyzed.
+Thus the sampling of natural, ideal and flattop sampling techniques were simulated and output waveform is obtained.
 
 
