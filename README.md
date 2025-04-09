@@ -72,23 +72,23 @@ plt.show()
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import butter, lfilter
-fs = 1000  # Sampling frequency (samples per second)
-T = 1  # Duration in seconds
-t = np.arange(0, T, 1 / fs)  # Time vector
-fm = 8  # Frequency of message signal (Hz)
+fs = 1000  
+T = 1  
+t = np.arange(0, T, 1 / fs)  
+fm = 8  
 message_signal = np.sin(2 * np.pi * fm * t)
-pulse_rate = 50  # pulses per second
+pulse_rate = 50 
 pulse_train = np.zeros_like(t)
 pulse_width = int(fs / pulse_rate / 2)
 for i in range(0, len(t), int(fs / pulse_rate)):
-    pulse_train[i:min(i + pulse_width, len(t))] = 1  # Corrected pulse width handling
+    pulse_train[i:min(i + pulse_width, len(t))] = 1
 nat_signal = message_signal * pulse_train
 def lowpass_filter(signal, cutoff, fs, order=5):
     nyquist = 0.5 * fs
     normal_cutoff = cutoff / nyquist
     b, a = butter(order, normal_cutoff, btype='low', analog=False)
     return lfilter(b, a, signal)
-reconstructed_signal = lowpass_filter(nat_signal, 10, fs) # apply low pass filter to the naturally sampled signal.
+reconstructed_signal = lowpass_filter(nat_signal, 10, fs) 
 plt.figure(figsize=(14, 10))
 plt.subplot(4, 1, 1)
 plt.plot(t, message_signal, label='Original Message Signal')
@@ -117,19 +117,19 @@ plt.show()
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.signal import butter, lfilter
-fs = 1000  # Sampling frequency (samples per second)
-T = 1  # Duration in seconds
-t = np.arange(0, T, 1/fs)  # Time vector
-fm = 4  # Frequency of message signal (Hz)
+fs = 1000  
+T = 1  
+t = np.arange(0, T, 1/fs)  
+fm = 4  
 message_signal = np.sin(2 * np.pi * fm * t)
-pulse_rate = 50  # pulses per second
+pulse_rate = 50 
 pulse_train = np.zeros_like(t)
-pulse_width = int(fs / pulse_rate / 4)  # Flat-top width
+pulse_width = int(fs / pulse_rate / 4)  
 for i in range(0, len(t), int(fs / pulse_rate)):
     pulse_train[i:i+pulse_width] = 1
 flat_top_signal = np.copy(message_signal)
 for i in range(0, len(t), int(fs / pulse_rate)):
-    flat_top_signal[i:i+pulse_width] = message_signal[i]  # Hold value constant
+    flat_top_signal[i:i+pulse_width] = message_signal[i]  
 sampled_signal = flat_top_signal[pulse_train == 1]
 sample_times = t[pulse_train == 1]
 reconstructed_signal = np.zeros_like(t)
